@@ -20,7 +20,13 @@ if ($_FILES['abstractFile']['error'] === UPLOAD_ERR_INI_SIZE) {
 $targetFile = $targetDirectory . basename($_FILES["abstractFile"]["name"]);
 
 $idSubmission = uniqid();
-$idFile = $idSubmission . '_' . $_POST['name'] . '_' . $_FILES["abstractFile"]["name"];
+
+// Sanitizing and creating a safe file name
+$safeName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $_POST['name']);
+$safeFileName = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $_FILES["abstractFile"]["name"]);
+$idFile = $idSubmission . '_' . $safeName . '_' . $safeFileName;
+
+// Path of the file to be uploaded
 $targetFile = $targetDirectory . $idFile;
 
 $isUploadSuccessful = false;
@@ -47,13 +53,16 @@ if ($isUploadSuccessful) {
         // Create a new CSV file if it doesn't exist
         $fileHandle = fopen($csvFilePath, 'w');
         // Write the CSV headers
-        fputcsv($fileHandle, ['id', 'name', 'email', 'filename', 'uploaded_at']);
+        fputcsv($fileHandle, ['id', 'name', 'email', 'phone', 'affiliation', 'title', 'filename', 'uploaded_at',]);
         fclose($fileHandle);
     }
     $formData = [
         'id' => $idSubmission, // Generates a unique ID for the submission
         'name' => $_POST['name'], // User's name from the form
         'email' => $_POST['email'], // User's email from the form
+        'phone' => $_POST['phone'], // User's phone from the form
+        'affiliation' => $_POST['affiliation'], // User's affiliation from the form
+        'title' => $_POST['title'], // User's title from the form
         'filename' => $idFile, // Uploaded file name
         // Current date and time and timezone of the server
         'uploaded_at' => date('Y-m-d H:i:s')

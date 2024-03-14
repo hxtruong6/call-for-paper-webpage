@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Abstract Submission Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div class="flex items-center justify-center min-h-screen">
+      <div class="px-8 py-6 mt-4 text-left bg-white shadow-lg">
+        <h3 class="text-2xl font-bold text-center">Submit Your Abstract</h3>
+        <form
+          id="abstractSubmissionForm"
+          action="file-upload.php"
+          method="post"
+          enctype="multipart/form-data"
+          class="mt-4"
+        >
+          <div>
+            <label class="block" for="name">Name:</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+              required
+            />
+          </div>
+          <div class="mt-4">
+            <label class="block" for="email">Email:</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+              required
+            />
+          </div>
+          <div class="mt-4">
+            <label class="block" for="abstractFile">Upload File:</label>
+            <p class="text-sm text-gray-500">
+              File size should not exceed 2 MB.
+            </p>
+            <input
+              type="file"
+              id="abstractFile"
+              name="abstractFile"
+              class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:border-blue-600"
+              required
+            />
+          </div>
+          <div class="flex items-center justify-center mt-4">
+            <input
+              type="submit"
+              value="Submit Abstract"
+              id="submitBtn"
+              class="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-700"
+            />
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Overlay -->
+    <div
+      id="dialogOverlay"
+      class="hidden fixed inset-0 bg-black bg-opacity-50"
+    ></div>
+
+    <!-- Dialog -->
+    <div
+      id="fileSizeDialog"
+      class="hidden fixed inset-0 flex items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h2 class="text-lg font-bold">File Size Limit Exceeded</h2>
+        <p class="mt-4">
+          The file size exceeds the limit of
+          <strong class="text-rose-600">2 MB</strong>. Please choose a smaller
+          file.
+        </p>
+        <div class="mt-6 flex justify-end">
+          <button
+            id="closeDialogBtn"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Okay
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Message Dialog Placeholder -->
+    <div
+      id="successDialog"
+      class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-semibold text-green-600">Success!</h2>
+          <button
+            id="closeSuccessDialog"
+            class="text-gray-400 hover:text-gray-500"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+        <p class="mt-2 text-gray-600">
+          Your submission has been successfully recorded! Thank you for your
+          contribution.
+        </p>
+        <div class="mt-4 flex justify-end">
+          <button
+            id="closeDialog"
+            onclick="closeSuccessDialog()"
+            class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-medium"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("abstractFile")
+        .addEventListener("change", function () {
+          var file = this.files[0];
+          var maxSize = 2 * 1024 * 1024; // 2 MB
+
+          if (file.size > maxSize) {
+            // Show the dialog
+            document.getElementById("dialogOverlay").classList.remove("hidden");
+            document
+              .getElementById("fileSizeDialog")
+              .classList.remove("hidden");
+          } else {
+            document.getElementById("submitBtn").disabled = false; // Enable submit button if file size is okay
+          }
+        });
+
+      // Close dialog logic
+      document
+        .getElementById("closeDialogBtn")
+        .addEventListener("click", function () {
+          document.getElementById("dialogOverlay").classList.add("hidden");
+          document.getElementById("fileSizeDialog").classList.add("hidden");
+          // Clear the selected file
+          document.getElementById("abstractFile").value = null;
+        });
+    </script>
+
+    <script>
+      document
+        .getElementById("abstractSubmissionForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault(); // Prevent default form submission
+
+          var formData = new FormData(this);
+
+          fetch("file-upload.php", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.text())
+            .then((data) => {
+              console.log(data); // Log server response for debugging
+              // Show success dialog
+              document
+                .getElementById("successDialog")
+                .classList.remove("hidden");
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+            });
+        });
+
+      // Close success dialog
+      document
+        .getElementById("closeSuccessDialog")
+        .addEventListener("click", function () {
+          document.getElementById("successDialog").classList.add("hidden");
+        });
+
+      function closeSuccessDialog() {
+        document.getElementById("successDialog").classList.add("hidden");
+      }
+    </script>
+  </body>
+</html>
